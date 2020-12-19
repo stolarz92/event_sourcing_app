@@ -37,6 +37,36 @@ class Events::BaseEvent < ActiveRecord::Base
     self.attributes["event_type"] || self.class.to_s.split("::").last
   end
 
+  def aggregate=(model)
+    public_send "#{aggregate_name}=", model
+  end
+
+  def aggregate
+    public_send aggregate_name
+  end
+
+  def aggregate_id=(id)
+    public_send "#{aggregate_name}_id=", id
+  end
+
+  def aggregate_id
+    public_send "#{aggregate_name}_id"
+  end
+
+  def self.aggregate_name
+    inferred_aggregate = reflect_on_all_associations(:belongs_to).first
+    raise "Events must belong to an aggregate" if inferred_aggregate.nil?
+    inferred_aggregate.name
+  end
+
+  delegate :aggregate_name, to: :class
+
+  def event_klass
+    klass = self.class.to_s.split("::")
+    klass[-1] = event_type
+    klass.join('::').constantize
+  end
+
   private
   def apply_and_persist
     # Lock the database row! (OK because we're in an ActiveRecord callback chain transaction)
