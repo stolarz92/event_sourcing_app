@@ -8,6 +8,26 @@ class Events::BaseEvent < ActiveRecord::Base
 
   before_create :apply_and_persist
 
+  def self.payload_attributes(*attributes)
+    @payload_attributes ||= []
+
+    attributes.map(&:to_s).each do |attribute|
+      @payload_attributes << attribute unless @payload_attributes.include?(attribute)
+
+      define_method attribute do
+        self.payload ||= {}
+        self.payload[attribute]
+      end
+
+      define_method "#{attribute}=" do |argument|
+        self.payload ||= {}
+        self.payload[attribute] = argument
+      end
+    end
+
+    @payload_attributes
+  end
+
   def apply(aggregate)
     raise NotImplementedError
   end
