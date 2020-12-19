@@ -67,8 +67,7 @@ class Events::BaseEvent < ActiveRecord::Base
     klass.join('::').constantize
   end
 
-  private
-  def apply_and_persist
+  private def apply_and_persist
     # Lock the database row! (OK because we're in an ActiveRecord callback chain transaction)
     aggregate.lock! if aggregate.persisted?
 
@@ -82,7 +81,6 @@ class Events::BaseEvent < ActiveRecord::Base
     self.aggregate_id = aggregate.id if aggregate_id.nil?
   end
 
-  private
   def find_or_build_aggregate
     self.aggregate = find_aggregate if aggregate_id.present?
     self.aggregate = build_aggregate if self.aggregate.nil?
