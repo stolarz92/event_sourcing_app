@@ -1,10 +1,19 @@
 class Events::BaseEvent < ActiveRecord::Base
   self.abstract_class = true
 
+  after_initialize do
+    self.event_type = event_type
+    self.payload ||= {}
+  end
+
   before_create :apply_and_persist
 
   def apply(aggregate)
     raise NotImplementedError
+  end
+
+  def event_type
+    self.attributes["event_type"] || self.class.to_s.split("::").last
   end
 
   private def apply_and_persist
