@@ -6,6 +6,7 @@ class Events::BaseEvent < ActiveRecord::Base
     self.payload ||= {}
   end
 
+  before_validation :find_or_build_aggregate
   before_create :apply_and_persist
 
   def self.payload_attributes(*attributes)
@@ -36,7 +37,8 @@ class Events::BaseEvent < ActiveRecord::Base
     self.attributes["event_type"] || self.class.to_s.split("::").last
   end
 
-  private def apply_and_persist
+  private
+  def apply_and_persist
     # Lock the database row! (OK because we're in an ActiveRecord callback chain transaction)
     aggregate.lock! if aggregate.persisted?
 
@@ -48,5 +50,20 @@ class Events::BaseEvent < ActiveRecord::Base
 
     # Update aggregate_id with id from newly created User
     self.aggregate_id = aggregate.id if aggregate_id.nil?
+  end
+
+  private
+  def find_or_build_aggregate
+    self.aggregate = find_aggregate if aggregate_id.present?
+    self.aggregate = build_aggregate if self.aggregate.nil?
+  end
+
+  def find_aggregate
+    klass = aggregate_name.to_s.classify.constantize
+    klass.find(aggregate_id)
+  end
+
+  def build_aggregate
+    public_send "build_#{aggregate_name}"
   end
 end
