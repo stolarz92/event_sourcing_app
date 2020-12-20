@@ -18,7 +18,10 @@ RSpec.describe "Users", type: :request do
 
     context 'with valid payload' do
       it 'creates new event' do
-        post '/users/create', params: valid_params
+        expect { post '/users/create', params: valid_params }
+          .to change { User.count }.by(1)
+          .and change { Events::User::BaseEvent.count }.by(1)
+
         expect(response).to have_http_status(:created)
       end
     end
@@ -41,7 +44,10 @@ RSpec.describe "Users", type: :request do
       let(:valid_payload) { { id: user.id } }
 
       it 'destroys event' do
-        delete "/users/destroy", params: valid_params
+        expect { delete "/users/destroy", params: valid_params }
+          .to change { Events::User::BaseEvent.count }.by(1)
+
+        expect { user.reload.deleted }
         expect(response).to have_http_status(:no_content)
       end
     end
