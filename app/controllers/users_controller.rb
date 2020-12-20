@@ -6,9 +6,10 @@ class UsersController < ApplicationController
   end
 
   def destroy
+    Events::User::Destroyed.destroy(user_id: user_params[:id], payload: user_params)
   end
 
   private def user_params
-    params.require(:user).permit(:name, :email, :password)
+    params.require(:user).permit(:id, :name, :email, :password)
   end
 end
