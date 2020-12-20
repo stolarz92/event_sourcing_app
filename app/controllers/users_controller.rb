@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    Events::User::Destroyed.destroy(user_id: user_params[:id], payload: user_params)
+    Events::User::Destroyed.create(user_id: user_params[:id], payload: user_params)
     render status: :no_content
   end
 
