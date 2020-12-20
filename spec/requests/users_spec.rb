@@ -6,15 +6,13 @@ RSpec.describe "Users", type: :request do
   end
 
   describe "POST /users/create" do
-    let(:user_params) do
+    let(:valid_payload) do
       {
         name: 'Test Name',
         email: 'test@email.com',
         password: 'password'
       }
     end
-
-    let(:valid_payload) { user_params }
 
     context 'with valid payload' do
       it 'creates new event' do
