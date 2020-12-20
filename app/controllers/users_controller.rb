@@ -3,10 +3,12 @@ class UsersController < ApplicationController
 
   def create
     Events::User::Created.create(payload: user_params)
+    render status: :created
   end
 
   def destroy
     Events::User::Destroyed.destroy(user_id: user_params[:id], payload: user_params)
+    render status: :no_content
   end
 
   private def user_params
